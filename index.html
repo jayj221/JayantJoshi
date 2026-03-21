@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jayant Joshi — Finance & Entrepreneur</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#04040a;
+  --surface:#07070f;
+  --card:#0a0a14;
+  --accent:#00ff88;
+  --amber:#f5a623;
+  --red:#ff3b3b;
+  --text:#d8d8e8;
+  --dim:#888899;
+  --border:#141424;
+  --border2:#1e1e30;
+}
+html{scroll-behavior:smooth;cursor:none;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+
+/* CURSOR */
+#cur{position:fixed;width:8px;height:8px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .08s;}
+#cur-r{position:fixed;width:32px;height:32px;border:1px solid rgba(0,255,136,.4);border-radius:50%;pointer-events:none;z-index:9998;transition:width .2s,height .2s;}
+.cur-big{width:52px!important;height:52px!important;}
+
+/* CANVAS */
+#bgc{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* INTRO LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.loader-text{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.25em;text-transform:uppercase;}
+.loader-bar-wrap{width:200px;height:1px;background:var(--border2);}
+.loader-bar{height:1px;background:var(--accent);width:0%;transition:width .05s linear;}
+.loader-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.15em;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:24px 56px;border-bottom:1px solid var(--border);}
+nav::after{content:'';position:absolute;inset:0;background:rgba(4,4,10,.85);backdrop-filter:blur(12px);z-index:-1;}
+.nav-id{display:flex;align-items:center;gap:14px;}
+.nav-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s ease infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,255,136,.4);}50%{box-shadow:0 0 0 6px rgba(0,255,136,0);}}
+.nav-name{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);text-decoration:none;letter-spacing:.12em;text-transform:uppercase;transition:color .3s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{background:var(--accent)!important;color:#000!important;padding:8px 18px!important;font-weight:600!important;border-radius:2px;transition:opacity .2s!important;}
+.nav-cta:hover{opacity:.85;}
+
+/* HERO */
+#hero{position:relative;z-index:10;height:100vh;display:grid;grid-template-columns:1fr 380px;align-items:end;padding:0 56px 80px;gap:60px;}
+.hero-left{}
+.hero-status{display:flex;align-items:center;gap:10px;margin-bottom:28px;opacity:0;animation:up .8s .2s forwards;}
+.hero-status-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+.hero-status span{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;}
+.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,10vw,148px);line-height:.9;letter-spacing:.02em;color:var(--text);opacity:0;animation:up .9s .4s forwards;}
+.hero-h1 em{color:var(--accent);font-style:normal;}
+.hero-desc{font-size:15px;line-height:1.8;color:var(--dim);margin-top:28px;max-width:540px;opacity:0;animation:up .9s .7s forwards;}
+.hero-desc strong{color:var(--text);}
+.hero-actions{display:flex;gap:16px;margin-top:36px;opacity:0;animation:up .9s .9s forwards;}
+.btn-primary{font-family:'IBM Plex Mono',monospace;font-size:12px;background:var(--accent);color:#000;padding:12px 28px;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:opacity .2s;}
+.btn-primary:hover{opacity:.8;}
+.btn-ghost{font-family:'IBM Plex Mono',monospace;font-size:12px;border:1px solid var(--border2);color:var(--dim);padding:12px 28px;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:border-color .2s,color .2s;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+
+/* HERO TICKER CARD */
+.hero-ticker{background:var(--card);border:1px solid var(--border2);padding:28px 24px;opacity:0;animation:up .9s 1s forwards;}
+.ticker-header{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:20px;display:flex;justify-content:space-between;}
+.ticker-header span:last-child{color:var(--accent);}
+.ticker-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.ticker-row:last-child{border-bottom:none;}
+.ticker-label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);}
+.ticker-val{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;color:var(--accent);}
+.ticker-val.amber{color:var(--amber);}
+.ticker-val.red{color:var(--red);}
+.ticker-change{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);}
+.ticker-change.neg{color:var(--red);}
+
+/* MARQUEE */
+.marquee-wrap{position:relative;z-index:10;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;padding:14px 0;background:var(--surface);}
+.marquee-inner{display:flex;gap:0;animation:marq 35s linear infinite;white-space:nowrap;}
+.marquee-item{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);padding:0 32px;letter-spacing:.12em;text-transform:uppercase;border-right:1px solid var(--border);}
+.marquee-item.hi{color:var(--accent);}
+@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* SECTION BASE */
+section.block{position:relative;z-index:10;padding:100px 56px;}
+.s-label{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.22em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.s-label::before{content:'//';color:var(--dim);}
+.s-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(42px,5vw,72px);color:var(--text);letter-spacing:.03em;line-height:1;margin-bottom:56px;}
+
+/* ABOUT */
+#about{border-top:1px solid var(--border);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;}
+.about-body{font-size:16px;line-height:1.85;color:var(--dim);}
+.about-body strong{color:var(--text);}
+.about-body p+p{margin-top:18px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.stat-tile{background:var(--card);border:1px solid var(--border2);padding:28px 24px;transition:border-color .3s;}
+.stat-tile:hover{border-color:var(--accent);}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);line-height:1;}
+.stat-l{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);margin-top:6px;letter-spacing:.1em;text-transform:uppercase;line-height:1.5;}
+
+/* EXPERIENCE — the centrepiece */
+#experience{border-top:1px solid var(--border);}
+.exp-company-block{margin-bottom:2px;}
+.exp-company-header{background:var(--card);border:1px solid var(--border2);padding:28px 40px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;cursor:pointer;transition:border-color .3s;}
+.exp-company-header:hover{border-color:var(--border2);}
+.exp-co-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;}
+.exp-co-info{}
+.exp-co-name{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--text);letter-spacing:.05em;line-height:1;}
+.exp-co-role{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);margin-top:4px;letter-spacing:.08em;}
+.exp-co-meta{text-align:right;}
+.exp-co-period{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.08em;}
+.exp-co-type{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);margin-top:4px;letter-spacing:.1em;text-transform:uppercase;}
+.exp-body-panel{border:1px solid var(--border2);border-top:none;background:#06060e;padding:40px 40px 40px 88px;display:grid;grid-template-columns:1fr 280px;gap:48px;}
+.exp-points{list-style:none;}
+.exp-points li{font-size:14px;color:var(--dim);line-height:1.9;padding-left:20px;position:relative;margin-bottom:4px;}
+.exp-points li::before{content:'▸';position:absolute;left:0;color:var(--accent);font-size:10px;top:5px;}
+.exp-points li strong{color:var(--text);}
+.exp-sidebar{}
+.exp-tag-title{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;}
+.exp-tags-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px;}
+.etag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);border:1px solid var(--border2);padding:4px 8px;letter-spacing:.08em;text-transform:uppercase;}
+.etag.g{border-color:rgba(0,255,136,.3);color:var(--accent);}
+.exp-metric{background:var(--card);border:1px solid var(--border2);padding:16px;margin-bottom:8px;}
+.exp-metric-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);line-height:1;}
+.exp-metric-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);margin-top:4px;letter-spacing:.08em;}
+
+/* BUILT SECTION */
+#built{border-top:1px solid var(--border);}
+.built-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+.build-card{background:var(--card);border:1px solid var(--border2);padding:36px 32px;position:relative;overflow:hidden;transition:border-color .4s;}
+.build-card:hover{border-color:var(--accent);}
+.build-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(to right,var(--accent),transparent);transform:scaleX(0);transform-origin:left;transition:transform .5s;}
+.build-card:hover::after{transform:scaleX(1);}
+.bc-type{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.15em;text-transform:uppercase;margin-bottom:14px;}
+.bc-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text);letter-spacing:.04em;margin-bottom:12px;line-height:1.1;}
+.bc-desc{font-size:13px;color:var(--dim);line-height:1.8;}
+.bc-desc strong{color:var(--text);}
+.bc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:24px;}
+.bc-status{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;}
+.bc-status.live::before{content:'● ';animation:pulse 1.5s infinite;}
+.bc-tags{display:flex;gap:6px;}
+.bc-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);border:1px solid var(--border2);padding:3px 8px;}
+
+/* EDUCATION */
+#education{border-top:1px solid var(--border);}
+.edu-card{background:var(--card);border:1px solid var(--border2);padding:40px;display:grid;grid-template-columns:1fr auto;gap:40px;}
+.edu-deg{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--text);letter-spacing:.03em;line-height:1.1;margin-bottom:8px;}
+.edu-inst{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);letter-spacing:.1em;margin-bottom:20px;}
+.edu-points{list-style:none;}
+.edu-points li{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);padding-left:16px;position:relative;line-height:1.9;}
+.edu-points li::before{content:'//';position:absolute;left:0;color:var(--border2);font-size:10px;}
+.edu-right{text-align:right;display:flex;flex-direction:column;gap:16px;justify-content:flex-start;}
+.edu-cgpa{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--accent);line-height:1;}
+.edu-cgpa-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;margin-top:2px;}
+.edu-badge{background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.3);padding:10px 14px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.08em;line-height:1.5;}
+
+/* ACHIEVEMENTS TEASER */
+#ach-teaser{border-top:1px solid var(--border);background:var(--surface);}
+.ach-inner{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border2);}
+.ach-left{padding:64px 56px;border-right:1px solid var(--border2);}
+.ach-left p{font-size:16px;color:var(--dim);line-height:1.8;margin-top:20px;}
+.ach-right{padding:64px 56px;display:flex;flex-direction:column;gap:12px;}
+.ach-pill{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border2);padding:14px 20px;transition:border-color .3s;}
+.ach-pill:hover{border-color:var(--accent);}
+.ach-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);min-width:52px;}
+.ach-pill-text{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);line-height:1.5;}
+.ach-pill-text strong{color:var(--text);}
+.ach-cta{display:inline-block;margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:12px;background:transparent;border:1px solid var(--accent);color:var(--accent);padding:12px 28px;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s;}
+.ach-cta:hover{background:var(--accent);color:#000;}
+
+/* SKILLS */
+#skills{border-top:1px solid var(--border);}
+.skills-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}
+.skill-col{background:var(--card);border:1px solid var(--border2);padding:28px 24px;}
+.skill-col-head{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border2);}
+.skill-item{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);padding:6px 0;border-bottom:1px solid var(--border);line-height:1.4;}
+.skill-item:last-child{border-bottom:none;}
+
+/* CONTACT */
+#contact{border-top:1px solid var(--border);padding:100px 56px;}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end;}
+.contact-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,7vw,108px);line-height:.88;letter-spacing:.02em;}
+.contact-big em{color:var(--accent);font-style:normal;}
+.contact-links{display:flex;flex-direction:column;gap:0;}
+.c-link{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--border);text-decoration:none;transition:padding-left .2s;}
+.c-link:hover{padding-left:8px;}
+.c-link:hover .c-label{color:var(--accent);}
+.c-link:hover .c-arr{color:var(--accent);}
+.c-label{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text);letter-spacing:.1em;}
+.c-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);}
+.c-arr{color:var(--border2);font-size:18px;transition:color .2s;}
+
+/* FOOTER */
+footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:28px 56px;display:flex;justify-content:space-between;align-items:center;}
+.f-left{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.1em;}
+.f-right{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);letter-spacing:.08em;}
+.f-right span{color:var(--accent);}
+
+/* NOISE */
+.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in{opacity:1;transform:none;}
+
+@keyframes up{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-r"></div>
+<canvas id="bgc"></canvas>
+<div class="noise"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-text">Initialising</div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="lbar"></div></div>
+  <div class="loader-sub" id="lsub">Loading portfolio...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-id">
+    <div class="nav-dot"></div>
+    <span class="nav-name">Jayant Joshi</span>
+  </div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#built">Built</a>
+    <a href="#ach-teaser">Awards</a>
+    <a href="#contact">Contact</a>
+    <a href="achievements.html" class="nav-cta">Achievements →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-status"><div class="hero-status-dot"></div><span>Finance Professional &amp; Entrepreneur — Available</span></div>
+    <h1 class="hero-h1">JAYANT<br/><em>JOSHI</em></h1>
+    <p class="hero-desc">I build financial models that hold up under pressure — and products that don't need a second pitch. <strong>Valuation advisory, M&amp;A, wealth management</strong> and early-stage ecosystems. CFA Candidate. Founder in progress.</p>
+    <div class="hero-actions">
+      <a href="#experience" class="btn-primary">See My Work</a>
+      <a href="achievements.html" class="btn-ghost">Achievements ↗</a>
+    </div>
+  </div>
+  <div class="hero-ticker">
+    <div class="ticker-header"><span>Portfolio Snapshot</span><span>● LIVE</span></div>
+    <div class="ticker-row">
+      <span class="ticker-label">AUM Managed</span>
+      <span class="ticker-val">₹440M</span>
+      <span class="ticker-change">+17% IRR</span>
+    </div>
+    <div class="ticker-row">
+      <span class="ticker-label">Buy-Side Deals</span>
+      <span class="ticker-val">₹1.018B</span>
+      <span class="ticker-change">2 txns</span>
+    </div>
+    <div class="ticker-row">
+      <span class="ticker-label">Pricing Accuracy</span>
+      <span class="ticker-val amber">+25%</span>
+      <span class="ticker-change">D&amp;P</span>
+    </div>
+    <div class="ticker-row">
+      <span class="ticker-label">Fintech Raise (WIP)</span>
+      <span class="ticker-val">₹45M</span>
+      <span class="ticker-change amber">In talks</span>
+    </div>
+    <div class="ticker-row">
+      <span class="ticker-label">CGPA</span>
+      <span class="ticker-val">8.1/10</span>
+      <span class="ticker-change">DU Topper</span>
+    </div>
+    <div class="ticker-row">
+      <span class="ticker-label">CFA</span>
+      <span class="ticker-val amber">L1 Candidate</span>
+      <span class="ticker-change amber">2025</span>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <span class="marquee-item hi">DCF</span><span class="marquee-item">LBO Modelling</span><span class="marquee-item hi">Precedent Transactions</span><span class="marquee-item">WACC / CAPM</span><span class="marquee-item hi">GPC / PORI</span><span class="marquee-item">ECL Computation</span><span class="marquee-item hi">Wealth Management</span><span class="marquee-item">S&P Capital IQ</span><span class="marquee-item hi">Valuation Advisory</span><span class="marquee-item">Investment Memoranda</span><span class="marquee-item hi">Python</span><span class="marquee-item">Generative AI</span><span class="marquee-item hi">CFA L1</span><span class="marquee-item">Wharton Certified</span><span class="marquee-item hi">B-Plan Competitions</span><span class="marquee-item">Fintech Founder</span>
+    <span class="marquee-item hi">DCF</span><span class="marquee-item">LBO Modelling</span><span class="marquee-item hi">Precedent Transactions</span><span class="marquee-item">WACC / CAPM</span><span class="marquee-item hi">GPC / PORI</span><span class="marquee-item">ECL Computation</span><span class="marquee-item hi">Wealth Management</span><span class="marquee-item">S&P Capital IQ</span><span class="marquee-item hi">Valuation Advisory</span><span class="marquee-item">Investment Memoranda</span><span class="marquee-item hi">Python</span><span class="marquee-item">Generative AI</span><span class="marquee-item hi">CFA L1</span><span class="marquee-item">Wharton Certified</span><span class="marquee-item hi">B-Plan Competitions</span><span class="marquee-item">Fintech Founder</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about" class="block">
+  <div class="s-label">Profile</div>
+  <div class="about-grid reveal">
+    <div>
+      <h2 class="s-title">WHO I AM</h2>
+      <div class="about-body">
+        <p>Finance professional and <strong>entrepreneur</strong> who started investing in cryptocurrencies and US stocks at 16, built a water desalination prototype at 15 that was sold to an NGO, and is currently building a <strong>fintech application in talks to raise ₹45 million</strong>.</p>
+        <p>Academically, I graduated from <strong>Shaheed Sukhdev College of Business Studies</strong> with a BBA in Financial Investment Analysis — topping the University of Delhi in 5 subjects. I am a <strong>CFA Level-1 Candidate</strong> and hold certifications from Wharton and HKUST.</p>
+        <p>Professionally, I've sat across trading desks, valuation tables, strategy rooms at <strong>EY</strong>, and investment banking floors at <strong>HDFC Bank</strong>. Every role sharpened one instinct: <strong>build things that generate returns.</strong></p>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <div class="stat-n">₹440M</div>
+        <div class="stat-l">AUM Managed<br/>Anand Rathi</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-n">17%</div>
+        <div class="stat-l">IRR Driven<br/>HNI Portfolios</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-n">4</div>
+        <div class="stat-l">Internships<br/>EY · HDFC · AR · D&P</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-n">8+</div>
+        <div class="stat-l">Competition<br/>Podium Finishes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" class="block" style="padding-top:80px;">
+  <div class="s-label">Professional Experience</div>
+  <h2 class="s-title reveal">WHERE I'VE WORKED</h2>
+
+  <!-- D&P -->
+  <div class="exp-company-block reveal">
+    <div class="exp-company-header">
+      <div class="exp-co-num">01</div>
+      <div class="exp-co-info">
+        <div class="exp-co-name">D&P Advisory Ltd.</div>
+        <div class="exp-co-role">Valuation Analyst</div>
+      </div>
+      <div class="exp-co-meta">
+        <div class="exp-co-period">Jun 2025 — Present</div>
+        <div class="exp-co-type">Valuation · FS</div>
+      </div>
+    </div>
+    <div class="exp-body-panel">
+      <ul class="exp-points">
+        <li>Built <strong>integrated valuation models</strong> using Precedent Transactions, PORI, GPC, GTM and WACC DCF — all across the Financial Services sector</li>
+        <li>Conducted peer benchmarking via <strong>S&P Capital IQ</strong>, normalising capital structures and improving pricing accuracy by <strong>25%</strong></li>
+        <li>Led <strong>PD modelling and ECL computation</strong> across multi-currency portfolios, translating credit risk into actionable investment insights</li>
+        <li>Deployed full-spectrum valuation toolkit — from selecting comparable universe to triangulating a defensible equity value range</li>
+      </ul>
+      <div class="exp-sidebar">
+        <div class="exp-tag-title">Methods Used</div>
+        <div class="exp-tags-list">
+          <span class="etag g">WACC DCF</span><span class="etag g">GPC</span><span class="etag g">Precedent Txn</span><span class="etag">PORI</span><span class="etag">GTM</span><span class="etag">ECL</span><span class="etag">PD Modelling</span>
+        </div>
+        <div class="exp-metric"><div class="exp-metric-val">+25%</div><div class="exp-metric-lbl">Pricing Accuracy Improvement</div></div>
+        <div class="exp-metric"><div class="exp-metric-val" style="color:var(--amber)">Multi-CCY</div><div class="exp-metric-lbl">Portfolio Coverage</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HDFC -->
+  <div class="exp-company-block reveal">
+    <div class="exp-company-header">
+      <div class="exp-co-num">02</div>
+      <div class="exp-co-info">
+        <div class="exp-co-name">HDFC Bank Ltd.</div>
+        <div class="exp-co-role">Wealth &amp; Investment Banking Intern</div>
+      </div>
+      <div class="exp-co-meta">
+        <div class="exp-co-period">Jun 2024 — Aug 2024</div>
+        <div class="exp-co-type">M&A · IB</div>
+      </div>
+    </div>
+    <div class="exp-body-panel">
+      <ul class="exp-points">
+        <li>Built <strong>LBO and DCF models</strong> for 2 buy-side transactions totalling <strong>₹1.018 billion</strong>, evaluating acquisition returns and downside risk</li>
+        <li>Produced <strong>Investment Memoranda</strong> combining rigorous financial analysis, market mapping and competitive positioning across 2 sectors</li>
+        <li>Modelled debt waterfall, equity returns, and exit scenarios under bear/base/bull assumptions to stress-test deal thesis</li>
+      </ul>
+      <div class="exp-sidebar">
+        <div class="exp-tag-title">Deliverables</div>
+        <div class="exp-tags-list">
+          <span class="etag g">LBO Model</span><span class="etag g">DCF</span><span class="etag">Investment Memo</span><span class="etag">Market Mapping</span><span class="etag">Buy-Side M&A</span>
+        </div>
+        <div class="exp-metric"><div class="exp-metric-val">₹1.018B</div><div class="exp-metric-lbl">Deal Value Modelled</div></div>
+        <div class="exp-metric"><div class="exp-metric-val" style="color:var(--amber)">2 IMs</div><div class="exp-metric-lbl">Produced Across Sectors</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anand Rathi -->
+  <div class="exp-company-block reveal">
+    <div class="exp-company-header">
+      <div class="exp-co-num">03</div>
+      <div class="exp-co-info">
+        <div class="exp-co-name">Anand Rathi Wealth</div>
+        <div class="exp-co-role">Wealth Management Intern</div>
+      </div>
+      <div class="exp-co-meta">
+        <div class="exp-co-period">Apr 2024 — Jun 2024</div>
+        <div class="exp-co-type">Wealth · HNI</div>
+      </div>
+    </div>
+    <div class="exp-body-panel">
+      <ul class="exp-points">
+        <li>Managed <strong>₹440M across 2 HNI portfolios</strong>, driving a <strong>17% IRR</strong> and 4% alpha through active asset allocation and risk calibration</li>
+        <li>Designed portfolio strategies across <strong>public equities, structured products (SPs) and MLDs</strong>; modelled downside risk and leveraged payoff scenarios</li>
+        <li>Evaluated <strong>index-linked instruments</strong> under varying volatility and return assumptions to optimise risk-adjusted outcomes</li>
+      </ul>
+      <div class="exp-sidebar">
+        <div class="exp-tag-title">Coverage</div>
+        <div class="exp-tags-list">
+          <span class="etag g">HNI Portfolios</span><span class="etag g">17% IRR</span><span class="etag">SPs / MLDs</span><span class="etag">Risk Calibration</span><span class="etag">Asset Allocation</span>
+        </div>
+        <div class="exp-metric"><div class="exp-metric-val">₹440M</div><div class="exp-metric-lbl">AUM Managed</div></div>
+        <div class="exp-metric"><div class="exp-metric-val">+4%</div><div class="exp-metric-lbl">Alpha Generated</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EY -->
+  <div class="exp-company-block reveal">
+    <div class="exp-company-header">
+      <div class="exp-co-num">04</div>
+      <div class="exp-co-info">
+        <div class="exp-co-name">Ernst &amp; Young</div>
+        <div class="exp-co-role">Strategy Consulting Intern</div>
+      </div>
+      <div class="exp-co-meta">
+        <div class="exp-co-period">Feb 2024 — Apr 2024</div>
+        <div class="exp-co-type">Strategy · Gov</div>
+      </div>
+    </div>
+    <div class="exp-body-panel">
+      <ul class="exp-points">
+        <li>Integrated <strong>12 Ministry of Education schemes</strong> including SAMAGRA Shiksha, TEQUIP and NIPUN Bharat within the NIOS Framework</li>
+        <li>Developed an <strong>implementation roadmap</strong> with execution timelines via Cross-Functional Stakeholder Alignment for Government of India</li>
+        <li>Projected <strong>₹200M cost optimisation</strong> through Resource Reallocation and Zero-Based Budgeting across MoE portfolios</li>
+      </ul>
+      <div class="exp-sidebar">
+        <div class="exp-tag-title">Scope</div>
+        <div class="exp-tags-list">
+          <span class="etag g">Govt. of India</span><span class="etag">ZBB</span><span class="etag">12 Schemes</span><span class="etag">Stakeholder Mgmt</span><span class="etag">Roadmapping</span>
+        </div>
+        <div class="exp-metric"><div class="exp-metric-val">₹200M</div><div class="exp-metric-lbl">Cost Optimisation Projected</div></div>
+        <div class="exp-metric"><div class="exp-metric-val" style="color:var(--amber)">12</div><div class="exp-metric-lbl">MoE Schemes Integrated</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paasa -->
+  <div class="exp-company-block reveal">
+    <div class="exp-company-header">
+      <div class="exp-co-num">05</div>
+      <div class="exp-co-info">
+        <div class="exp-co-name">Paasa (YC S24)</div>
+        <div class="exp-co-role">Founder's Office — Offer Extended</div>
+      </div>
+      <div class="exp-co-meta">
+        <div class="exp-co-period">Mar 2026</div>
+        <div class="exp-co-type" style="color:var(--accent)">YC-Backed</div>
+      </div>
+    </div>
+    <div class="exp-body-panel">
+      <ul class="exp-points">
+        <li>Interviewed for Customer Success at a <strong>Y Combinator S24 startup</strong>; subsequently shortlisted for a <strong>Founder's Office role</strong> following final-round discussions</li>
+        <li>Demonstrates alignment with high-velocity early-stage environments and founder-level problem ownership</li>
+      </ul>
+      <div class="exp-sidebar">
+        <div class="exp-tag-title">Signal</div>
+        <div class="exp-tags-list">
+          <span class="etag g">YC S24</span><span class="etag g">Founder's Office</span><span class="etag">Early-Stage</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BUILT -->
+<section id="built" class="block">
+  <div class="s-label">What I've Built</div>
+  <h2 class="s-title reveal">THE BUILDS</h2>
+  <div class="built-grid reveal">
+
+    <div class="build-card">
+      <div class="bc-type">🚀 Fintech · Startup</div>
+      <div class="bc-title">Fintech Application</div>
+      <div class="bc-desc">Currently building a fintech product — <strong>in talks to raise ₹45 million</strong>. Combining deep finance domain knowledge with a builder's instinct to solve a real market gap in the Indian financial ecosystem.</div>
+      <div class="bc-footer">
+        <span class="bc-status live">Raising</span>
+        <div class="bc-tags"><span class="bc-tag">Fintech</span><span class="bc-tag">₹45M</span></div>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="bc-type">🔧 Hardware · Impact</div>
+      <div class="bc-title">Water Desalination Prototype</div>
+      <div class="bc-desc">At <strong>age 15</strong>, designed and built a low-cost water desalination prototype. It was subsequently <strong>sold to a Delhi-based NGO</strong> for community deployment. First proof that building something that works is worth more than any slide deck.</div>
+      <div class="bc-footer">
+        <span class="bc-status" style="color:var(--amber)">Deployed</span>
+        <div class="bc-tags"><span class="bc-tag">Hardware</span><span class="bc-tag">NGO Sale</span></div>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="bc-type">📊 Finance · Modelling</div>
+      <div class="bc-title">Integrated Valuation Models</div>
+      <div class="bc-desc">Across D&P and HDFC, built full-stack valuation models using <strong>DCF, LBO, Precedent Transactions, GPC, PORI</strong> and WACC frameworks — not as academic exercises but as live deal support for billion-rupee transactions.</div>
+      <div class="bc-footer">
+        <span class="bc-status live">Live Deal Use</span>
+        <div class="bc-tags"><span class="bc-tag">DCF</span><span class="bc-tag">LBO</span><span class="bc-tag">GPC</span></div>
+      </div>
+    </div>
+
+    <div class="build-card">
+      <div class="bc-type">📝 Research · Web3</div>
+      <div class="bc-title">Published Research — Web3 & Crypto</div>
+      <div class="bc-desc">Published independent research on the <strong>intersection of Web3 and Cryptocurrencies</strong>. Started investing in crypto and US equities at 16 — the research followed from years of firsthand market participation and pattern recognition.</div>
+      <div class="bc-footer">
+        <span class="bc-status" style="color:var(--amber)">Published</span>
+        <div class="bc-tags"><span class="bc-tag">Web3</span><span class="bc-tag">Research</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education" class="block">
+  <div class="s-label">Education</div>
+  <h2 class="s-title reveal">ACADEMIC RECORD</h2>
+  <div class="edu-card reveal">
+    <div>
+      <div class="edu-deg">BBA — Financial Investment Analysis</div>
+      <div class="edu-inst">Shaheed Sukhdev College of Business Studies, University of Delhi · 2022–2025</div>
+      <ul class="edu-points">
+        <li>University of Delhi Topper in 5 subjects</li>
+        <li>Recipient of Best Internship Award — Batch of 2025</li>
+        <li>Director of Public Relations, Enactus SSCBS</li>
+        <li>Co-Founder &amp; Head of Department, Project Kaagazi</li>
+        <li>Committee Member, FinX — The Finance Society of SSCBS</li>
+        <li>CFA Level-1 Candidate (2025)</li>
+        <li>Wharton: Fundamentals of Quantitative Marketing</li>
+        <li>HKUST: Statistics and Python Certification</li>
+      </ul>
+    </div>
+    <div class="edu-right">
+      <div>
+        <div class="edu-cgpa">8.1</div>
+        <div class="edu-cgpa-lbl">CGPA / 10<br/>(3.24 / 4.0)</div>
+      </div>
+      <div class="edu-badge">Best Internship Award<br/>Batch of 2025</div>
+      <div class="edu-badge" style="border-color:rgba(0,255,136,.3);color:var(--accent);background:rgba(0,255,136,.05)">DU Topper<br/>5 Subjects</div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS TEASER -->
+<section id="ach-teaser" class="block" style="padding-top:80px;padding-bottom:80px;">
+  <div class="s-label">Awards &amp; Achievements</div>
+  <div class="ach-inner reveal">
+    <div class="ach-left">
+      <h2 class="s-title" style="margin-bottom:0;">THE PODIUMS</h2>
+      <p>From national B-Plan rankings to Wharton's global investment competition — a track record of showing up and placing. <strong>8+ podium finishes</strong> across 10,000+ combined participants.</p>
+      <a href="achievements.html" class="ach-cta">View All Achievements →</a>
+    </div>
+    <div class="ach-right">
+      <div class="ach-pill">
+        <span class="ach-rank">#1</span>
+        <span class="ach-pill-text"><strong>Socio Bee 9.0 B-Plan</strong><br/>450+ participants · SRCC</span>
+      </div>
+      <div class="ach-pill">
+        <span class="ach-rank">#2</span>
+        <span class="ach-pill-text"><strong>IgniteX B-Plan Competition</strong><br/>1,000+ participants · XLRI</span>
+      </div>
+      <div class="ach-pill">
+        <span class="ach-rank">TOP 20</span>
+        <span class="ach-pill-text"><strong>Wharton Global Investment Competition</strong><br/>7,500 teams · CIO &amp; Team Leader</span>
+      </div>
+      <div class="ach-pill">
+        <span class="ach-rank">#1</span>
+        <span class="ach-pill-text"><strong>Avishkaran B-Plan · BVP</strong><br/>65 teams</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" class="block" style="padding-top:60px;">
+  <div class="s-label">Skills &amp; Tools</div>
+  <h2 class="s-title reveal">THE TOOLKIT</h2>
+  <div class="skills-grid reveal">
+    <div class="skill-col">
+      <div class="skill-col-head">Financial Modelling</div>
+      <div class="skill-item">DCF / WACC</div>
+      <div class="skill-item">LBO Modelling</div>
+      <div class="skill-item">GPC / Precedent Txn</div>
+      <div class="skill-item">PORI / GTM</div>
+      <div class="skill-item">ECL / PD Modelling</div>
+      <div class="skill-item">Investment Memoranda</div>
+    </div>
+    <div class="skill-col">
+      <div class="skill-col-head">Analytics &amp; Research</div>
+      <div class="skill-item">S&P Capital IQ</div>
+      <div class="skill-item">Renitiv Eikon</div>
+      <div class="skill-item">Alteryx</div>
+      <div class="skill-item">Bloomberg / CapIQ</div>
+      <div class="skill-item">Market Mapping</div>
+      <div class="skill-item">Peer Benchmarking</div>
+    </div>
+    <div class="skill-col">
+      <div class="skill-col-head">Technology</div>
+      <div class="skill-item">Python</div>
+      <div class="skill-item">HTML / CSS</div>
+      <div class="skill-item">Excel (Advanced)</div>
+      <div class="skill-item">LangChain</div>
+      <div class="skill-item">GitHub Copilot</div>
+      <div class="skill-item">Cursor / Claude / Notion AI</div>
+    </div>
+    <div class="skill-col">
+      <div class="skill-col-head">Certifications</div>
+      <div class="skill-item">CFA Level-1 Candidate</div>
+      <div class="skill-item">Wharton — Quant Marketing</div>
+      <div class="skill-item">HKUST — Stats &amp; Python</div>
+      <div class="skill-item">Microsoft Office Suite</div>
+      <div class="skill-item">Investor — Crypto &amp; US Stocks</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="s-label">Get In Touch</div>
+      <div class="contact-big">LET'S<br/>BUILD<br/><em>SOMETHING.</em></div>
+    </div>
+    <div class="contact-links reveal">
+      <a class="c-link" href="mailto:jjoshi221@gmail.com">
+        <span class="c-label">EMAIL</span>
+        <span class="c-val">jjoshi221@gmail.com</span>
+        <span class="c-arr">→</span>
+      </a>
+      <a class="c-link" href="https://www.linkedin.com/in/jayantxjoshi/" target="_blank">
+        <span class="c-label">LINKEDIN</span>
+        <span class="c-val">/in/jayantxjoshi</span>
+        <span class="c-arr">→</span>
+      </a>
+      <a class="c-link" href="tel:+919818300229">
+        <span class="c-label">PHONE</span>
+        <span class="c-val">+91 98183 00229</span>
+        <span class="c-arr">→</span>
+      </a>
+      <a class="c-link" href="achievements.html">
+        <span class="c-label">ACHIEVEMENTS</span>
+        <span class="c-val">Full awards page →</span>
+        <span class="c-arr">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p class="f-left">© 2025 Jayant Joshi — Finance Professional &amp; Entrepreneur</p>
+  <p class="f-right">Built with <span>intent.</span></p>
+</footer>
+
+<script>
+// LOADER
+const steps=['Loading financial data...','Compiling model stack...','Mapping deal history...','Rendering portfolio...'];
+let prog=0;
+const lbar=document.getElementById('lbar');
+const lsub=document.getElementById('lsub');
+const loader=document.getElementById('loader');
+let si=0;
+const intv=setInterval(()=>{
+  prog+=Math.random()*18+6;
+  if(prog>=100){prog=100;clearInterval(intv);}
+  lbar.style.width=Math.min(prog,100)+'%';
+  if(si<steps.length&&prog>si*25){lsub.textContent=steps[si];si++;}
+  if(prog>=100){
+    setTimeout(()=>{loader.style.opacity='0';loader.style.transition='opacity .6s';setTimeout(()=>{loader.style.display='none';},600);},300);
+  }
+},120);
+
+// CURSOR
+const cur=document.getElementById('cur');
+const curR=document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=(mx-4)+'px';cur.style.top=(my-4)+'px';});
+(function animR(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;curR.style.left=(rx-16)+'px';curR.style.top=(ry-16)+'px';requestAnimationFrame(animR);})();
+document.querySelectorAll('a,.build-card,.stat-tile,.ach-pill,.skill-col,.exp-company-header').forEach(el=>{
+  el.addEventListener('mouseenter',()=>curR.classList.add('cur-big'));
+  el.addEventListener('mouseleave',()=>curR.classList.remove('cur-big'));
+});
+
+// THREE.JS
+const canvas=document.getElementById('bgc');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,1000);
+camera.position.z=6;
+
+// Grid floor
+const gridHelper=new THREE.GridHelper(40,40,0x0a0a18,0x0a0a18);
+gridHelper.position.y=-3;
+gridHelper.material.transparent=true;
+gridHelper.material.opacity=0.6;
+scene.add(gridHelper);
+
+// Particles
+const N=2800;
+const geo=new THREE.BufferGeometry();
+const pos=new Float32Array(N*3),col=new Float32Array(N*3);
+for(let i=0;i<N;i++){
+  pos[i*3]=(Math.random()-.5)*32;
+  pos[i*3+1]=(Math.random()-.5)*20;
+  pos[i*3+2]=(Math.random()-.5)*18;
+  const r=Math.random();
+  if(r<.12){col[i*3]=0;col[i*3+1]=1;col[i*3+2]=.53;} // accent green
+  else if(r<.18){col[i*3]=.96;col[i*3+1]=.65;col[i*3+2]=.14;} // amber
+  else{col[i*3]=.12;col[i*3+1]=.12;col[i*3+2]=.22;}
+}
+geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+geo.setAttribute('color',new THREE.BufferAttribute(col,3));
+const pts=new THREE.Points(geo,new THREE.PointsMaterial({size:.03,vertexColors:true,transparent:true,opacity:.85,sizeAttenuation:true}));
+scene.add(pts);
+
+// Wireframe octahedron
+const oct=new THREE.Mesh(new THREE.OctahedronGeometry(1.6,2),new THREE.MeshBasicMaterial({color:0x0d1a0d,wireframe:true,transparent:true,opacity:.15}));
+oct.position.set(5,1,-4);
+scene.add(oct);
+
+// Torus knot
+const tk=new THREE.Mesh(new THREE.TorusKnotGeometry(.8,.2,60,8),new THREE.MeshBasicMaterial({color:0x0a180a,wireframe:true,transparent:true,opacity:.12}));
+tk.position.set(-5.5,0,-3);
+scene.add(tk);
+
+let tx=0,ty=0,t=0;
+document.addEventListener('mousemove',e=>{tx=(e.clientX/innerWidth-.5)*.5;ty=(e.clientY/innerHeight-.5)*-.35;});
+(function anim(){
+  requestAnimationFrame(anim);
+  t+=.003;
+  pts.rotation.y+=.0003;
+  oct.rotation.x=t*.3;oct.rotation.y=t*.5;
+  tk.rotation.x=t*.4;tk.rotation.z=t*.2;
+  gridHelper.rotation.y=t*.02;
+  camera.position.x+=(tx-camera.position.x)*.035;
+  camera.position.y+=(ty-camera.position.y)*.035;
+  camera.lookAt(scene.position);
+  renderer.render(scene,camera);
+})();
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
