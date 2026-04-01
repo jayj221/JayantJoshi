@@ -1,1 +1,0 @@
-# Jayant-Joshi-Resume
