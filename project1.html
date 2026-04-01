@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Pulse — The Platform Where Culture Moves First</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#8B5CF6;--purpleL:#A78BFA;--purpleD:#6D28D9;
+  --gold:#F59E0B;--goldL:#FCD34D;
+  --teal:#06B6D4;--green:#10B981;--red:#EF4444;
+  --bg:#07070F;--card:#13121F;
+  --white:#F8F7FF;--muted:rgba(248,247,255,0.55);--faint:rgba(248,247,255,0.2);
+}
+html{background:#000;height:100%}
+body{
+  background:#000;color:var(--white);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  height:100%;overflow:hidden;
+}
+
+/* ── PHONE FRAME WRAPPER ── */
+.phone-frame{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center, #1a0a2e 0%, #000 70%);
+}
+.phone{
+  width:min(393px,100vw);
+  height:min(852px,100vh);
+  position:relative;overflow:hidden;border-radius:min(48px,0px);
+  background:var(--bg);
+  box-shadow:0 40px 120px rgba(139,92,246,0.3),0 0 0 1px rgba(255,255,255,0.08);
+}
+@media(max-width:420px){.phone{border-radius:0;box-shadow:none}}
+
+/* ── REEL CONTAINER ── */
+.reels{
+  height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.reels::-webkit-scrollbar{display:none}
+
+/* ── SINGLE REEL ── */
+.reel{
+  height:100%;width:100%;scroll-snap-align:start;
+  position:relative;overflow:hidden;flex-shrink:0;
+  display:flex;flex-direction:column;justify-content:center;
+}
+
+/* ── BACKGROUNDS per reel ── */
+.reel-1{background:linear-gradient(160deg,#0D0018 0%,#130820 40%,#07070F 100%)}
+.reel-2{background:linear-gradient(160deg,#180B0B 0%,#0F0707 50%,#07070F 100%)}
+.reel-3{background:linear-gradient(145deg,#050510 0%,#0A0A2A 50%,#07070F 100%)}
+.reel-4{background:linear-gradient(155deg,#08001A 0%,#120830 50%,#07070F 100%)}
+.reel-5{background:linear-gradient(155deg,#001A1A 0%,#051212 50%,#07070F 100%)}
+.reel-6{background:linear-gradient(155deg,#1A1000 0%,#120A00 50%,#07070F 100%)}
+.reel-7{background:linear-gradient(155deg,#0A0320 0%,#180840 50%,#07070F 100%)}
+.reel-8{background:linear-gradient(155deg,#001008 0%,#041A10 50%,#07070F 100%)}
+.reel-9{background:linear-gradient(160deg,#0A0820 0%,#141026 50%,#07070F 100%)}
+.reel-10{background:linear-gradient(155deg,#0D0820 0%,#1A0F38 50%,#07070F 100%)}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:absolute;top:0;left:0;right:0;z-index:20;
+  padding:14px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.55),transparent);
+}
+.topbar-logo{font-size:1rem;font-weight:800;letter-spacing:1px;color:var(--white)}
+.topbar-score{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(139,92,246,0.18);border:1px solid rgba(139,92,246,0.35);
+  border-radius:100px;padding:4px 12px;font-size:0.72rem;font-weight:700;color:var(--purpleL);
+}
+
+/* ── RIGHT ACTIONS (TikTok sidebar) ── */
+.actions{
+  position:absolute;right:12px;bottom:120px;z-index:20;
+  display:flex;flex-direction:column;align-items:center;gap:20px;
+}
+.action-btn{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;user-select:none;
+}
+.action-icon{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.12);
+  transition:transform 0.15s,background 0.15s;
+  backdrop-filter:blur(8px);
+}
+.action-icon:active{transform:scale(0.88)}
+.action-icon.crown{background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.4);font-size:1.1rem}
+.action-label{font-size:0.65rem;color:var(--muted);font-weight:600}
+
+/* ── BOTTOM INFO ── */
+.bottom-info{
+  position:absolute;bottom:0;left:0;right:56px;z-index:20;
+  padding:16px 16px 28px;
+  background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%);
+}
+.username{font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:5px}
+.username span{color:var(--purpleL)}
+.caption{font-size:0.82rem;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.tags{font-size:0.78rem;color:var(--purpleL);font-weight:600}
+
+/* ── PROGRESS DOTS ── */
+.progress-dots{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  z-index:20;display:flex;flex-direction:column;gap:5px;
+}
+.dot{
+  width:3px;height:3px;border-radius:50%;background:var(--faint);
+  transition:all 0.3s;
+}
+.dot.active{background:var(--white);height:18px;border-radius:2px}
+.dot.past{background:rgba(255,255,255,0.45)}
+
+/* ── SWIPE HINT ── */
+.swipe-hint{
+  position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:20;font-size:0.7rem;color:var(--faint);
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  animation:bounce 2s ease-in-out infinite;
+}
+.swipe-hint .arr{font-size:0.9rem}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-5px)}}
+
+/* ── REEL CONTENT AREAS ── */
+.reel-inner{
+  padding:80px 20px 140px;width:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  animation:fadeUp 0.6s ease both;
+  animation-play-state:paused;
+}
+.reel.visible .reel-inner{animation-play-state:running}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TYPOGRAPHY ── */
+.kicker{
+  font-size:0.7rem;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.kicker::before{content:'';width:24px;height:2px;border-radius:2px;background:currentColor;display:inline-block}
+.big{font-size:clamp(1.9rem,7vw,2.5rem);font-weight:900;line-height:1.1;margin-bottom:16px;letter-spacing:-1px}
+.sub{font-size:0.95rem;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.gold{color:var(--gold)}
+.purple{color:var(--purpleL)}
+.teal{color:var(--teal)}
+.green{color:var(--green)}
+.red-c{color:var(--red)}
+.grad{background:linear-gradient(135deg,var(--purple),var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── CARDS ── */
+.card{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;padding:16px;margin-bottom:10px;
+}
+.card-row{display:flex;gap:10px;margin-bottom:10px}
+.card-half{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px}
+
+/* ── STAT CHIPS ── */
+.stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.stat-chip{
+  background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);
+  border-radius:100px;padding:6px 14px;font-size:0.78rem;font-weight:700;
+}
+
+/* ── SCORE DISPLAY ── */
+.score-display{
+  background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.3);
+  border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;
+}
+.score-num{font-size:3rem;font-weight:900;color:var(--gold);line-height:1}
+.score-label{font-size:0.7rem;color:var(--muted);margin-top:4px;letter-spacing:1.5px;text-transform:uppercase}
+.tier-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);
+  border-radius:100px;padding:6px 16px;font-size:0.82rem;font-weight:700;color:var(--gold);
+  margin-top:10px;
+}
+
+/* ── TREND STAGES ── */
+.stages{display:flex;gap:6px;margin-bottom:14px}
+.stage{
+  flex:1;border-radius:10px;padding:10px 6px;text-align:center;
+  font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
+}
+.stage .stage-icon{font-size:1.1rem;margin-bottom:4px}
+.stage .stage-pts{font-size:0.58rem;margin-top:4px;opacity:0.7}
+
+/* ── CROWN BOX ── */
+.crown-box{
+  text-align:center;background:rgba(245,158,11,0.08);
+  border:2px solid rgba(245,158,11,0.35);border-radius:20px;
+  padding:24px 16px;margin-bottom:14px;position:relative;
+  animation:crownPulse 2.5s ease-in-out infinite;
+}
+@keyframes crownPulse{0%,100%{box-shadow:0 0 20px rgba(245,158,11,0.15)}50%{box-shadow:0 0 50px rgba(245,158,11,0.35)}}
+.crown-icon{font-size:3rem;display:block;margin-bottom:8px}
+.crown-title{font-size:1rem;font-weight:800;color:var(--gold)}
+.crown-sub{font-size:0.8rem;color:var(--muted);margin-top:4px}
+.transfer-bar{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px;padding:10px 14px;margin-top:8px;
+}
+.transfer-bar .arrow{color:var(--gold);font-size:1.1rem}
+.transfer-bar .name{font-size:0.78rem;font-weight:600;color:var(--white)}
+.transfer-bar .sub{font-size:0.68rem;color:var(--muted)}
+
+/* ── TOPIC BUBBLES (reel 8) ── */
+.topics-grid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.topic{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:100px;padding:6px 13px;font-size:0.75rem;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:all 0.2s;user-select:none;
+}
+.topic:active,.topic.sel{
+  background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.55);color:var(--white);
+}
+
+/* ── TIMELINE (reel 9) ── */
+.timeline{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.tl-item{
+  display:flex;align-items:flex-start;gap:12px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:12px;
+}
+.tl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tl-title{font-size:0.85rem;font-weight:700;color:var(--white);margin-bottom:2px}
+.tl-body{font-size:0.75rem;color:var(--muted);line-height:1.5}
+
+/* ── CTA BUTTON ── */
+.cta-btn{
+  width:100%;padding:15px;border-radius:100px;border:none;
+  background:linear-gradient(135deg,var(--purple),var(--teal));
+  color:#fff;font-size:1rem;font-weight:800;cursor:pointer;
+  letter-spacing:0.5px;margin-top:8px;
+  box-shadow:0 8px 32px rgba(139,92,246,0.35);
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.cta-btn:active{transform:scale(0.97);box-shadow:0 4px 16px rgba(139,92,246,0.2)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:rgba(255,255,255,0.07);margin:12px 0}
+
+/* ── ANIMATED TEXT ── */
+@keyframes wordIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.word{display:inline-block;opacity:0;animation:wordIn 0.4s ease both}
+
+/* ── GLOW ── */
+.glow-purple{
+  position:absolute;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,transparent 70%);
+  pointer-events:none;
+}
+.glow-gold{
+  position:absolute;width:250px;height:250px;border-radius:50%;
+  background:radial-gradient(circle,rgba(245,158,11,0.15) 0%,transparent 70%);
+  pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="phone">
+
+  <!-- REELS CONTAINER -->
+  <div class="reels" id="reels">
+
+    <!-- ══════════════════════════════════
+         REEL 1 — THE HOOK
+    ══════════════════════════════════ -->
+    <div class="reel reel-1" data-reel="0">
+      <div class="glow-purple" style="top:-60px;right:-60px"></div>
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 0 pts</div>
+      </div>
+      <!-- CONTENT -->
+      <div class="reel-inner" style="text-align:center">
+        <div class="kicker" style="color:var(--red);justify-content:center">The Trigger</div>
+        <div class="big" style="font-size:clamp(1.7rem,6.5vw,2.3rem)">
+          You shared<br>
+          <span class="red-c">one post.</span>
+        </div>
+        <div class="big" style="font-size:clamp(1.5rem,5.5vw,2rem);color:var(--muted);font-weight:700;margin-bottom:20px">
+          Your feed hasn't been<br>the same since.
+        </div>
+        <div class="divider"></div>
+        <div class="sub" style="font-size:0.85rem;text-align:center;margin-top:12px">
+          You didn't choose this.<br>Nobody asked you.
+        </div>
+        <div class="stat-row" style="justify-content:center">
+          <div class="stat-chip" style="color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.1)">48 hrs of damage</div>
+          <div class="stat-chip" style="color:var(--red);border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.1)">from 1 interaction</div>
+        </div>
+      </div>
+      <!-- BOTTOM -->
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">The algorithm isn't broken. It's working exactly as designed — to keep you hooked, not informed.</div>
+        <div class="tags">#algorithm #socialmedia #pulse</div>
+      </div>
+      <!-- RIGHT ACTIONS -->
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">247K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">18.4K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+      <!-- SWIPE HINT -->
+      <div class="swipe-hint"><div class="arr">↑</div><div>swipe up</div></div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 2 — THE SCIENCE
+    ══════════════════════════════════ -->
+    <div class="reel reel-2" data-reel="1">
+      <div class="glow-purple" style="bottom:-40px;left:-80px;background:radial-gradient(circle,rgba(239,68,68,0.15) 0%,transparent 70%)"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 0 pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--red)">The Truth</div>
+        <div class="big">It's not <span class="red-c">your fault.</span><br>It's <span style="color:var(--white)">engineered.</span></div>
+        <div class="sub">The algorithm doesn't show you what you like. It shows you what makes you <strong style="color:var(--white)">feel the most</strong> — because fear and outrage keep you scrolling longer.</div>
+        <div class="card" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.06)">
+          <div style="font-size:1.8rem;font-weight:900;color:var(--red);line-height:1">100,000</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">people studied — short-form content is measurably shrinking your attention span, inhibitory control, and working memory.</div>
+        </div>
+        <div class="card" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.06)">
+          <div style="font-size:1.8rem;font-weight:900;color:var(--red);line-height:1">2+ points</div>
+          <div style="font-size:0.8rem;color:var(--muted);margin-top:4px">shift in actual political beliefs, measured, when researchers changed what content people saw. <em>Published in Science, 2024.</em></div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">Your worldview is being quietly sculpted. And you never consented to it.</div>
+        <div class="tags">#echochamber #algorithm #mentalhealth</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">189K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">22.1K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 3 — THE REFRAME
+    ══════════════════════════════════ -->
+    <div class="reel reel-3" data-reel="2">
+      <div class="glow-purple" style="top:30%;left:50%;transform:translateX(-50%);width:350px;height:350px"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 0 pts</div>
+      </div>
+      <div class="reel-inner" style="text-align:center">
+        <div class="kicker" style="color:var(--purple);justify-content:center">The Reframe</div>
+        <div class="big" style="color:var(--muted);font-size:clamp(1.4rem,5vw,1.9rem);margin-bottom:8px">
+          Scrolling isn't<br>the problem.
+        </div>
+        <div class="big" style="font-size:clamp(2.4rem,9vw,3.4rem);margin-bottom:20px" class="grad">
+          <span class="grad">CHAOS IS.</span>
+        </div>
+        <div class="divider"></div>
+        <div class="sub" style="margin-top:14px;font-size:0.88rem">
+          Every other app tells you to <strong style="color:var(--white)">put your phone down.</strong><br><br>
+          We're not here to lecture you.<br>
+          We're here to give the chaos <strong style="color:var(--purpleL)">a shape.</strong>
+        </div>
+        <div class="card" style="border-color:rgba(139,92,246,0.25);background:rgba(139,92,246,0.08);text-align:left;margin-top:8px">
+          <div style="font-size:0.88rem;font-weight:700;color:var(--white);margin-bottom:4px">Structured scrolling =</div>
+          <div style="font-size:0.8rem;color:var(--muted)">Topics you chose. Intent you set. An algorithm that finally reflects who you actually are — not who you were at 2am last Tuesday.</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">You didn't sign up for a feed that makes you anxious. You signed up to see things you love.</div>
+        <div class="tags">#pulse #intentional #structure</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">312K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">29.7K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 4 — INTRODUCING PULSE
+    ══════════════════════════════════ -->
+    <div class="reel reel-4" data-reel="3">
+      <div class="glow-purple" style="top:-40px;right:-40px;width:280px;height:280px;opacity:0.8"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 0 pts</div>
+      </div>
+      <div class="reel-inner" style="text-align:center">
+        <div class="kicker" style="color:var(--purpleL);justify-content:center">Introducing</div>
+        <div style="font-size:clamp(3rem,12vw,4.5rem);font-weight:900;letter-spacing:4px;line-height:1;margin-bottom:8px">
+          <span class="grad">PULSE</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px">The Platform Where Culture Moves First</div>
+        <div class="divider"></div>
+        <div class="sub" style="margin-top:14px;font-size:0.88rem">
+          A social media platform where your<br>
+          <strong style="color:var(--white)">Algorithm Score</strong><br>
+          replaces follower count as the<br>primary measure of influence.
+        </div>
+        <div class="card-row" style="margin-top:8px">
+          <div class="card-half" style="text-align:center;border-color:rgba(139,92,246,0.25)">
+            <div style="font-size:1.4rem;margin-bottom:4px">◈</div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--purpleL)">Algorithm Score</div>
+            <div style="font-size:0.65rem;color:var(--muted);margin-top:2px">Real-time. Transparent. Earned.</div>
+          </div>
+          <div class="card-half" style="text-align:center;border-color:rgba(245,158,11,0.25)">
+            <div style="font-size:1.4rem;margin-bottom:4px">♛</div>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--gold)">Crown System</div>
+            <div style="font-size:0.65rem;color:var(--muted);margin-top:2px">Fight for trend ownership.</div>
+          </div>
+        </div>
+        <div class="card-half" style="text-align:center;border-color:rgba(6,182,212,0.25);margin-top:0;width:100%;border-radius:12px;padding:10px">
+          <div style="font-size:1.4rem;margin-bottom:4px">⚑</div>
+          <div style="font-size:0.72rem;font-weight:700;color:var(--teal)">Trend Marketplace</div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-top:2px">Be first. Earn most. Crown shifts by traction.</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· #1 trending</span></div>
+        <div class="caption">Influence should be earned — not inherited from how old your account is.</div>
+        <div class="tags">#pulse #socialmedia #algorithmScore</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">891K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">44.2K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 5 — ALGORITHM SCORE
+    ══════════════════════════════════ -->
+    <div class="reel reel-5" data-reel="4">
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--teal)">Feature 01</div>
+        <div class="big">The <span class="teal">Algorithm</span><br>Score.</div>
+        <div class="score-display">
+          <div class="score-num" id="scoreCounter">0</div>
+          <div class="score-label">Algorithm Score</div>
+          <div class="tier-badge">♛ Oracle Tier</div>
+          <div style="font-size:0.72rem;color:var(--green);margin-top:8px">↑ +12,400 this week</div>
+        </div>
+        <div class="sub" style="font-size:0.82rem">Think of it like a <strong style="color:var(--white)">credit score for cultural relevance.</strong> Live. Transparent. Always moving. Decays if you go dormant.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="stat-chip" style="color:var(--teal);border-color:rgba(6,182,212,0.3);background:rgba(6,182,212,0.08)">Real-time updates</div>
+          <div class="stat-chip" style="color:var(--green);border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.08)">Earnable from day 1</div>
+          <div class="stat-chip" style="color:var(--purpleL);border-color:rgba(139,92,246,0.3);background:rgba(139,92,246,0.08)">Decays = always honest</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">No legacy. No inherited audience. Just how sharp you are, right now.</div>
+        <div class="tags">#algorithmScore #pulse #creators</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">412K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">31.5K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 6 — TREND MARKETPLACE
+    ══════════════════════════════════ -->
+    <div class="reel reel-6" data-reel="5">
+      <div class="glow-gold" style="top:-50px;right:-50px"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--gold)">Feature 02</div>
+        <div class="big">Trends are an <span class="gold">asset.</span><br>Be first. Earn most.</div>
+        <div class="sub" style="font-size:0.82rem">The person who spots a trend first gets the most points. The value of the trend <strong style="color:var(--white)">goes up</strong> as more people jump on it — like a stock.</div>
+        <div class="stages">
+          <div class="stage" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:var(--gold)">
+            <div class="stage-icon">◉</div>
+            <div>SPARK</div>
+            <div class="stage-pts">100% pts</div>
+          </div>
+          <div class="stage" style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);color:#FB923C">
+            <div class="stage-icon">◈</div>
+            <div>FLAME</div>
+            <div class="stage-pts">70% pts</div>
+          </div>
+          <div class="stage" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.25);color:var(--purpleL)">
+            <div class="stage-icon">◆</div>
+            <div>BLAZE</div>
+            <div class="stage-pts">40% pts</div>
+          </div>
+          <div class="stage" style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.2);color:var(--teal)">
+            <div class="stage-icon">◇</div>
+            <div>INFERNO</div>
+            <div class="stage-pts">20% pts</div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,0.2);background:rgba(245,158,11,0.06)">
+          <div style="font-size:0.85rem;font-weight:700;color:var(--gold);margin-bottom:4px">⚑  Active Trend: #AIArt2026</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:0.75rem;color:var(--muted)">Currently: BLAZE stage</div>
+            <div style="font-size:0.75rem;color:var(--gold);font-weight:700">BTV: 2.5× base</div>
+          </div>
+          <div style="margin-top:8px;background:rgba(255,255,255,0.06);border-radius:8px;height:6px;overflow:hidden">
+            <div style="width:62%;height:100%;background:linear-gradient(90deg,var(--gold),var(--purpleL));border-radius:8px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">Early movers see their stake appreciate. It's a stock market for cultural relevance.</div>
+        <div class="tags">#trendMarketplace #firstmover #pulse</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">563K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">38.9K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 7 — CROWN SYSTEM
+    ══════════════════════════════════ -->
+    <div class="reel reel-7" data-reel="6">
+      <div class="glow-gold" style="top:30%;left:50%;transform:translateX(-50%);opacity:0.6"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--purpleL)">Feature 03</div>
+        <div class="big">Fight for the<br><span class="gold">Crown. ♛</span></div>
+        <div class="crown-box">
+          <span class="crown-icon">♛</span>
+          <div class="crown-title">TREND OWNER</div>
+          <div class="crown-sub">#AIArt2026 · BLAZE stage</div>
+        </div>
+        <div class="transfer-bar">
+          <div>
+            <div class="name">@creativestudio</div>
+            <div class="sub">Current crown holder · 2.1M traction</div>
+          </div>
+          <div class="arrow" style="margin-left:auto">♛</div>
+        </div>
+        <div class="transfer-bar" style="margin-top:6px;border-color:rgba(139,92,246,0.25)">
+          <div>
+            <div class="name" style="color:var(--purpleL)">@newcomer_j</div>
+            <div class="sub">Challenging · 1.8M traction · rising fast</div>
+          </div>
+          <div style="font-size:0.7rem;color:var(--green);font-weight:700;margin-left:auto">↑ contesting</div>
+        </div>
+        <div class="sub" style="font-size:0.78rem;margin-top:10px">Crown transfers <strong style="color:var(--white)">in real time</strong> when a challenger's traction surpasses the current holder's. Every transfer <strong style="color:var(--gold)">increases the trend's value.</strong></div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· #2 trending</span></div>
+        <div class="caption">The fight for the crown IS the product. It's live. It's competitive. It's earned.</div>
+        <div class="tags">#crownSystem #trendowner #pulse</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">728K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">51.2K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 8 — YOU CHOOSE (TOPICS)
+    ══════════════════════════════════ -->
+    <div class="reel reel-8" data-reel="7">
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--green)">Your Feed</div>
+        <div class="big">You choose<br><span class="green">what gets in.</span></div>
+        <div class="sub" style="font-size:0.82rem">60+ topics. Tap what resonates. Change it any time. Your algorithm finally reflects you — not your worst scrolling moment.</div>
+        <div class="topics-grid" id="topics">
+          <div class="topic" onclick="this.classList.toggle('sel')">🌍 Geopolitics</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">💼 Startups</div>
+          <div class="topic sel" onclick="this.classList.toggle('sel')">🎵 Hip Hop</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">🏋️ Mental Health</div>
+          <div class="topic sel" onclick="this.classList.toggle('sel')">🔬 AI & ML</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">⚽ Football</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">🎭 Movies</div>
+          <div class="topic sel" onclick="this.classList.toggle('sel')">💡 Philosophy</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">🌱 Climate</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">😂 Comedy</div>
+          <div class="topic sel" onclick="this.classList.toggle('sel')">📈 Markets</div>
+          <div class="topic" onclick="this.classList.toggle('sel')">🚀 Space</div>
+        </div>
+        <div class="card" style="border-color:rgba(16,185,129,0.25);background:rgba(16,185,129,0.06)">
+          <div style="font-size:0.8rem;color:var(--green);font-weight:700">✓  Profile saved</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:3px">Pulse is now training your feed around these 4 topics.</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">Your content diet is yours. Not an algorithm's guess based on one angry share.</div>
+        <div class="tags">#topics #intentional #pulse</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">445K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">27.3K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 9 — WHY NOW
+    ══════════════════════════════════ -->
+    <div class="reel reel-9" data-reel="8">
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner">
+        <div class="kicker" style="color:var(--purpleL)">Why Now</div>
+        <div class="big">The moment<br>is <span class="purple">right.</span></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--purple)"></div>
+            <div>
+              <div class="tl-title">Creator Economy Disillusionment</div>
+              <div class="tl-body">Mid-tier creators are burning out. Followers don't convert to income or influence. They need a metric that reflects actual relevance.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--gold)"></div>
+            <div>
+              <div class="tl-title">Platform Trust at All-Time Low</div>
+              <div class="tl-body">Instagram, TikTok, X — all facing backlash over opaque algorithms. A transparent, meritocratic platform arrives at exactly the right moment.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="background:var(--teal)"></div>
+            <div>
+              <div class="tl-title">Gen-Z Fluency with Gamification</div>
+              <div class="tl-body">The generation that grew up on Fortnite ranks and Duolingo streaks understands a scored, competitive social layer without needing it explained.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="border-color:rgba(245,158,11,0.25);background:rgba(245,158,11,0.06)">
+          <div style="font-size:0.78rem;color:var(--gold);font-style:italic">Acquisition upside: the platform that owns the scoring layer of social media is exactly what Meta, TikTok, or YouTube would acquire.</div>
+        </div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· trending</span></div>
+        <div class="caption">The frustration is universal. The timing is perfect. The meritocracy layer doesn't exist yet.</div>
+        <div class="tags">#whynow #socialstartup #pulse</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">334K</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">19.8K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown">♛</div><div class="action-label">Crown</div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         REEL 10 — CTA
+    ══════════════════════════════════ -->
+    <div class="reel reel-10" data-reel="9">
+      <div class="glow-purple" style="top:20%;left:50%;transform:translateX(-50%);width:350px;height:350px;opacity:0.9"></div>
+      <div class="topbar">
+        <div class="topbar-logo">◈ PULSE</div>
+        <div class="topbar-score">♛ 847K pts</div>
+      </div>
+      <div class="reel-inner" style="text-align:center">
+        <div class="kicker" style="color:var(--gold);justify-content:center">Join Pulse</div>
+        <div style="font-size:3.5rem;margin-bottom:8px;animation:crownPulse 2.5s ease-in-out infinite">♛</div>
+        <div class="big" style="font-size:clamp(2rem,8vw,2.8rem)">Let's build<br><span class="grad">this.</span></div>
+        <div class="sub" style="font-size:0.88rem;margin-bottom:20px">
+          See the full picture.<br>Feel the culture move.<br>
+          <strong style="color:var(--white)">Earn your influence.</strong>
+        </div>
+        <div class="card" style="border-color:rgba(139,92,246,0.25);background:rgba(139,92,246,0.08);margin-bottom:12px">
+          <input id="emailInput" type="email" placeholder="your@email.com"
+            style="width:100%;background:transparent;border:none;color:var(--white);font-size:0.95rem;outline:none;font-family:inherit;padding:4px 0"
+          />
+        </div>
+        <button class="cta-btn" onclick="joinPulse()">Join the Waitlist →</button>
+        <div id="joinMsg" style="display:none;margin-top:12px;font-size:0.82rem;color:var(--green);font-weight:600">✓ You're in. We'll be in touch first.</div>
+        <div style="font-size:0.72rem;color:var(--faint);margin-top:12px">No spam. No selling your data. That would be ironic.</div>
+      </div>
+      <div class="bottom-info">
+        <div class="username">@pulse_app <span>· concept stage</span></div>
+        <div class="caption">Influence should be earned — not inherited. This is Pulse.</div>
+        <div class="tags">#pulse #joinwaitlist #buildinpublic</div>
+      </div>
+      <div class="actions">
+        <div class="action-btn"><div class="action-icon">♡</div><div class="action-label">1.2M</div></div>
+        <div class="action-btn"><div class="action-icon">💬</div><div class="action-label">88.4K</div></div>
+        <div class="action-btn"><div class="action-icon">↗</div><div class="action-label">Share</div></div>
+        <div class="action-btn"><div class="action-icon crown" style="background:rgba(245,158,11,0.3);border-color:var(--gold);animation:crownPulse 2s ease-in-out infinite">♛</div><div class="action-label" style="color:var(--gold)">Crown</div></div>
+      </div>
+    </div>
+
+  </div><!-- /reels -->
+
+  <!-- PROGRESS DOTS -->
+  <div class="progress-dots" id="progressDots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+</div><!-- /phone -->
+</div><!-- /phone-frame -->
+
+<script>
+const reelsEl = document.getElementById('reels');
+const dots = document.querySelectorAll('.dot');
+const reelEls = document.querySelectorAll('.reel');
+let currentReel = 0;
+let isScrolling = false;
+
+// Update progress dots
+function updateDots(idx) {
+  dots.forEach((d, i) => {
+    d.classList.remove('active','past');
+    if (i === idx) d.classList.add('active');
+    else if (i < idx) d.classList.add('past');
+  });
+}
+
+// Mark visible reel for animations
+function markVisible(idx) {
+  reelEls.forEach((r, i) => {
+    if (i === idx) r.classList.add('visible');
+  });
+}
+
+// Score counter animation (reel 5)
+function animateScore(target, duration = 1800) {
+  const el = document.getElementById('scoreCounter');
+  if (!el) return;
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(eased * target).toLocaleString();
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// IntersectionObserver for reel detection
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && entry.intersectionRatio > 0.6) {
+      const idx = parseInt(entry.target.dataset.reel);
+      currentReel = idx;
+      updateDots(idx);
+      markVisible(idx);
+      if (idx === 4) setTimeout(() => animateScore(847392), 400);
+    }
+  });
+}, { threshold: 0.6 });
+
+reelEls.forEach(r => observer.observe(r));
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (isScrolling) return;
+  if (e.key === 'ArrowDown' && currentReel < 9) {
+    reelEls[currentReel + 1].scrollIntoView({ behavior: 'smooth' });
+  } else if (e.key === 'ArrowUp' && currentReel > 0) {
+    reelEls[currentReel - 1].scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+// Touch swipe
+let touchStartY = 0;
+reelsEl.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, { passive: true });
+reelsEl.addEventListener('touchend', e => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(dy) < 30) return;
+  if (dy > 0 && currentReel < 9) reelEls[currentReel + 1].scrollIntoView({ behavior: 'smooth' });
+  else if (dy < 0 && currentReel > 0) reelEls[currentReel - 1].scrollIntoView({ behavior: 'smooth' });
+}, { passive: true });
+
+// Waitlist
+function joinPulse() {
+  const email = document.getElementById('emailInput').value;
+  if (!email || !email.includes('@')) {
+    document.getElementById('emailInput').style.borderBottom = '1px solid var(--red)';
+    return;
+  }
+  document.getElementById('joinMsg').style.display = 'block';
+  document.getElementById('emailInput').value = '';
+  document.querySelector('.cta-btn').style.opacity = '0.5';
+  document.querySelector('.cta-btn').disabled = true;
+}
+
+// Init
+markVisible(0);
+</script>
+</body>
+</html>
